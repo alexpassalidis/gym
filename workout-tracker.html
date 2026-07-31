@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Πρόγραμμα Προπόνησης</title>
+<style>
+  :root{
+    --bg:#14171a;
+    --panel:#1e2227;
+    --panel-2:#252a30;
+    --line:#31373e;
+    --lime:#c8ff3d;
+    --coral:#ff5a5f;
+    --text:#f1f1ea;
+    --muted:#8b9096;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,sans-serif;overscroll-behavior:none;}
+  h1,h2,h3{font-family:'Archivo Black','Inter',sans-serif;letter-spacing:0.5px;margin:0;}
+  .app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+
+  .topbar{padding:22px 18px 14px;position:sticky;top:0;background:linear-gradient(180deg,var(--bg) 80%,transparent);z-index:20;}
+  .topbar .eyebrow{font-size:11px;letter-spacing:2px;color:var(--lime);text-transform:uppercase;font-weight:700;}
+  .topbar h1{font-size:26px;margin-top:4px;text-transform:uppercase;}
+
+  .tabs{display:flex;gap:8px;padding:0 18px 14px;position:sticky;top:74px;background:var(--bg);z-index:19;}
+  .tab{flex:1;padding:12px 0;text-align:center;border-radius:14px;background:var(--panel);border:1px solid var(--line);font-weight:800;font-size:15px;color:var(--muted);cursor:pointer;transition:.15s;position:relative;}
+  .tab .sub{display:block;font-size:9px;font-weight:600;letter-spacing:1px;margin-top:2px;color:var(--muted);text-transform:uppercase;}
+  .tab.active{background:var(--lime);color:#14171a;border-color:var(--lime);}
+  .tab.active .sub{color:#14171a;opacity:.65;}
+
+  .setToggleRow{display:flex;align-items:center;justify-content:space-between;margin:0 18px 16px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;}
+  .setToggleRow .lbl{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+  .segmented{display:flex;background:var(--panel-2);border-radius:10px;padding:3px;gap:3px;}
+  .segBtn{border:none;background:transparent;color:var(--muted);font-weight:800;font-size:14px;padding:7px 16px;border-radius:8px;cursor:pointer;font-family:inherit;}
+  .segBtn.active{background:var(--lime);color:#14171a;}
+
+  .content{padding:0 18px 40px;flex:1;}
+  .focusNote{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:16px;padding:10px 14px;border-left:3px solid var(--lime);background:var(--panel);border-radius:0 10px 10px 0;}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 14px 16px;margin-bottom:12px;transition:.2s;}
+  .card.done{border-color:var(--lime);background:linear-gradient(180deg,rgba(200,255,61,.06),var(--panel) 40%);}
+  .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .ex-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;background:var(--panel-2);color:var(--lime);font-family:'Archivo Black';font-size:12px;flex-shrink:0;}
+  .ex-icon{position:relative;flex-shrink:0;width:46px;height:46px;border-radius:13px;background:var(--panel-2);display:flex;align-items:center;justify-content:center;}
+  .ex-icon svg{width:26px;height:26px;color:var(--lime);}
+  .card.done .ex-icon{background:rgba(200,255,61,.14);}
+  .ex-icon .num{position:absolute;bottom:-5px;right:-5px;width:17px;height:17px;border-radius:50%;background:var(--lime);color:var(--bg);font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:'Archivo Black';border:2px solid var(--panel);}
+  .ex-name{font-size:16px;font-weight:800;margin-top:2px;}
+  .ex-reps{font-size:12.5px;color:var(--muted);margin-top:2px;font-weight:600;}
+  .ex-head{display:flex;gap:10px;align-items:flex-start;flex:1;}
+
+  .restPill{flex-shrink:0;font-size:11px;font-weight:800;color:var(--coral);background:rgba(255,90,95,.12);padding:5px 9px;border-radius:8px;white-space:nowrap;}
+
+  .sets{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .setBox{width:44px;height:44px;border-radius:11px;border:1.5px solid var(--line);background:var(--panel-2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:var(--muted);cursor:pointer;transition:.12s;}
+  .setBox.checked{background:var(--lime);border-color:var(--lime);color:#14171a;}
+  .setBox:active{transform:scale(0.92);}
+
+  .timerRow{margin-top:12px;display:flex;gap:8px;}
+  .timerBtn{flex:1;padding:11px;border-radius:11px;border:1.5px solid var(--panel-2);background:var(--panel-2);color:var(--text);font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .timerBtn.running{border-color:var(--coral);color:var(--coral);}
+  .timerBtn.finished{border-color:var(--lime);color:var(--lime);}
+  .resetBtn{width:44px;flex-shrink:0;border-radius:11px;border:1.5px solid var(--panel-2);background:var(--panel-2);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .resetBtn:active{transform:scale(0.9);}
+
+  .progressWrap{position:sticky;bottom:0;padding:14px 18px 22px;background:linear-gradient(0deg,var(--bg) 70%,transparent);}
+  .progressBar{height:8px;background:var(--panel);border-radius:6px;overflow:hidden;border:1px solid var(--line);}
+  .progressFill{height:100%;background:var(--lime);width:0%;transition:width .3s;}
+  .progressLabel{font-size:11px;color:var(--muted);margin-top:6px;text-align:center;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important;} }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="eyebrow">Πρόγραμμα · 3 προπονήσεις</div>
+    <h1 id="workoutTitle">Workout A</h1>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="setToggleRow">
+    <span class="lbl">Σετ αυτή την εβδομάδα</span>
+    <div class="segmented">
+      <button class="segBtn" data-sets="3" onclick="setRounds(3)">3</button>
+      <button class="segBtn" data-sets="4" onclick="setRounds(4)">4</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="focusNote" id="focusNote"></div>
+    <div id="exerciseList"></div>
+  </div>
+
+  <div class="progressWrap">
+    <div class="progressBar"><div class="progressFill" id="progressFill"></div></div>
+    <div class="progressLabel" id="progressLabel">0 / 0 σετ ολοκληρώθηκαν</div>
+  </div>
+
+</div>
+
+<script>
+const DATA = {
+  A:{
+    label:"Workout A", sub:"Κορμός · Push",
+    focus:"Ξεκινάς με κοιλιακούς για ενεργοποίηση πυρήνα, μετά compound κινήσεις στήθους/ώμων.",
+    exercises:[
+      {name:"Alternate Heel Touches + Crunches", reps:"10 + 10", rest:"20\"", icon:"core"},
+      {name:"Goblet Squat (5 kg)", reps:"10", rest:"30\"", icon:"squat"},
+      {name:"Push-ups", reps:"10-12", rest:"30\"", icon:"push"},
+      {name:"One-arm Dumbbell Row (5 kg)", reps:"8 / χέρι", rest:"30\"", icon:"row"},
+      {name:"Shoulder Press (5 kg)", reps:"10", rest:"30\"", icon:"press"},
+      {name:"Mountain Climbers", reps:"40\"", rest:"20\"", icon:"cardio"},
+    ]
+  },
+  B:{
+    label:"Workout B", sub:"Posterior Chain",
+    focus:"Έμφαση σε γλουτούς, οπίσθιους μηριαίους και πλάτη, αφού το Α καλύπτει το στήθος.",
+    exercises:[
+      {name:"Hip Thrusts", reps:"10", rest:"30\"", icon:"hip"},
+      {name:"Sumo Squats", reps:"10", rest:"30\"", icon:"squat"},
+      {name:"Push-ups (Αργός Ρυθμός, Calisthenics)", reps:"6-8", rest:"30\"", icon:"push"},
+      {name:"Dumbbell Biceps Curl (5 kg)", reps:"8", rest:"30\"", icon:"curl"},
+      {name:"Overhead Triceps Extension (5 kg)", reps:"10", rest:"30\"", icon:"triceps"},
+      {name:"Superman Hold", reps:"2 x 20\"", rest:"20\"", icon:"hold"},
+    ]
+  },
+  C:{
+    label:"Workout C", sub:"Functional Full-Body",
+    focus:"Πιο λειτουργικό, ολόσωμο πρόγραμμα ώστε να υπάρχει ισορροπημένη επιβάρυνση μέσα στην εβδομάδα χωρίς επανάληψη των ίδιων κινήσεων.",
+    exercises:[
+      {name:"Plank", reps:"35\" → 45\" → 1'", rest:"20\"", icon:"hold"},
+      {name:"Reverse Lunges", reps:"8 / πόδι", rest:"30\"", icon:"lunge"},
+      {name:"Push-ups", reps:"10-12", rest:"30\"", icon:"push"},
+      {name:"Shoulder Press (5 kg)", reps:"10", rest:"30\"", icon:"press"},
+      {name:"One-arm Dumbbell Row (5 kg)", reps:"8 / χέρι", rest:"30\"", icon:"row"},
+      {name:"Alternate Heel Touches + Crunches", reps:"10 + 10", rest:"20\"", icon:"core"},
+    ]
+  }
+};
+
+const ICONS = {
+  core:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="11" r="1.7" fill="currentColor" stroke="none"/><path d="M9 13l4 3"/><path d="M13 16l4-2"/><path d="M13 16l1 4"/><path d="M4 19h16" opacity="0.3"/></svg>',
+  squat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="1.7" fill="currentColor" stroke="none"/><path d="M12 6v5"/><path d="M12 11l-3 3"/><path d="M9 14l1 5"/><path d="M12 11l3 3"/><path d="M15 14l-1 5"/><path d="M9 8h6" opacity="0.3"/></svg>',
+  push:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="10" r="1.6" fill="currentColor" stroke="none"/><path d="M7 11h11"/><path d="M9 11v5"/><path d="M16 11v5"/><path d="M18 11l2 2"/></svg>',
+  row:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="1.6" fill="currentColor" stroke="none"/><path d="M7 9l5 6"/><path d="M12 15l1 5"/><path d="M12 15l4 1"/><path d="M9 11l-2 2"/></svg>',
+  press:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="1.7" fill="currentColor" stroke="none"/><path d="M12 6v8"/><path d="M12 14l-3 6"/><path d="M12 14l3 6"/><path d="M12 7l-4-4"/><path d="M12 7l4-4"/><path d="M8 3h8" opacity="0.3"/></svg>',
+  cardio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="9" r="1.6" fill="currentColor" stroke="none"/><path d="M7 10h9"/><path d="M9 10v5"/><path d="M12 10l3-4"/><path d="M16 10l3 3"/><path d="M16 10l1-5"/></svg>',
+  hip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="15" r="1.6" fill="currentColor" stroke="none"/><path d="M6 16l6-4"/><path d="M12 12l4 3"/><path d="M16 15v5"/><path d="M16 15l4-1"/><path d="M2 20h20" opacity="0.3"/></svg>',
+  hold:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="11" r="1.6" fill="currentColor" stroke="none"/><path d="M7 11h10"/><path d="M7 11l-3-2"/><path d="M17 11l3-2"/><path d="M4 16h16" opacity="0.25"/></svg>',
+  curl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="1.7" fill="currentColor" stroke="none"/><path d="M12 6v6"/><path d="M12 12l-3 5"/><path d="M12 12l3 5"/><path d="M12 7l-3 3"/><path d="M9 10l2-2"/><circle cx="9" cy="10" r="1.3"/></svg>',
+  triceps:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="1.7" fill="currentColor" stroke="none"/><path d="M12 6v6"/><path d="M12 12l-3 5"/><path d="M12 12l3 5"/><path d="M12 6l2-3"/><path d="M14 3l-1 3"/><circle cx="13" cy="3" r="1.3"/></svg>',
+  lunge:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="1.7" fill="currentColor" stroke="none"/><path d="M12 6v6"/><path d="M12 12l-3 3"/><path d="M9 15v5"/><path d="M12 12l4 2"/><path d="M16 14l1 6"/></svg>'
+};
+
+let currentDay = "A";
+let rounds = 3;
+// state[day][exerciseIndex] = array of booleans length rounds
+let state = {};
+Object.keys(DATA).forEach(d=>{
+  state[d] = DATA[d].exercises.map(()=>[false,false,false,false]);
+});
+
+const tabsEl = document.getElementById('tabs');
+Object.keys(DATA).forEach(d=>{
+  const btn = document.createElement('div');
+  btn.className = 'tab' + (d===currentDay?' active':'');
+  btn.dataset.day = d;
+  btn.innerHTML = d + '<span class="sub">'+DATA[d].sub+'</span>';
+  btn.onclick = ()=>selectDay(d);
+  tabsEl.appendChild(btn);
+});
+
+function selectDay(d){
+  currentDay = d;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.day===d));
+  document.getElementById('workoutTitle').textContent = DATA[d].label;
+  document.getElementById('focusNote').textContent = DATA[d].focus;
+  render();
+}
+
+function setRounds(n){
+  rounds = n;
+  document.querySelectorAll('.segBtn').forEach(b=>b.classList.toggle('active', parseInt(b.dataset.sets)===n));
+  render();
+}
+
+function toggleSet(exIdx, setIdx){
+  state[currentDay][exIdx][setIdx] = !state[currentDay][exIdx][setIdx];
+  render();
+}
+
+let timers = {}; // key: exIdx -> {remaining, interval}
+
+function parseRestSeconds(restStr){
+  const m = restStr.match(/(\d+)(?:-(\d+))?/);
+  if(!m) return 60;
+  return m[2] ? parseInt(m[2]) : parseInt(m[1]);
+}
+
+function startTimer(exIdx, seconds, btn){
+  if(timers[exIdx] && timers[exIdx].interval){
+    clearInterval(timers[exIdx].interval);
+  }
+  let remaining = seconds;
+  btn.classList.remove('finished');
+  btn.classList.add('running');
+  btn.textContent = '⏱ ' + remaining + '"';
+  const interval = setInterval(()=>{
+    remaining--;
+    if(remaining <= 0){
+      clearInterval(interval);
+      btn.classList.remove('running');
+      btn.classList.add('finished');
+      btn.textContent = '✓ Έτοιμος';
+      timers[exIdx] = {remaining:0, interval:null};
+      if(navigator.vibrate) navigator.vibrate([120,60,120]);
+      setTimeout(()=>{ btn.classList.remove('finished'); btn.textContent='▶ Διάλειμμα '+seconds+'"'; }, 1800);
+    } else {
+      btn.textContent = '⏱ ' + remaining + '"';
+    }
+  }, 1000);
+  timers[exIdx] = {remaining, interval};
+}
+
+function resetTimer(exIdx, restLabel, btn){
+  if(timers[exIdx] && timers[exIdx].interval){
+    clearInterval(timers[exIdx].interval);
+  }
+  timers[exIdx] = {remaining:0, interval:null};
+  btn.classList.remove('running','finished');
+  btn.textContent = '▶ Διάλειμμα ' + restLabel;
+}
+
+function render(){
+  const list = document.getElementById('exerciseList');
+  list.innerHTML = '';
+  const exs = DATA[currentDay].exercises;
+  let totalSets = 0, doneSets = 0;
+
+  exs.forEach((ex, i)=>{
+    const arr = state[currentDay][i];
+    const doneCount = arr.slice(0, rounds).filter(Boolean).length;
+    totalSets += rounds;
+    doneSets += doneCount;
+    const allDone = doneCount === rounds;
+
+    const card = document.createElement('div');
+    card.className = 'card' + (allDone ? ' done' : '');
+
+    const restSeconds = parseRestSeconds(ex.rest);
+
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="ex-head">
+          <div class="ex-icon">${ICONS[ex.icon] || ICONS.core}<span class="num">${i+1}</span></div>
+          <div>
+            <div class="ex-name">${ex.name}</div>
+            <div class="ex-reps">${ex.reps}</div>
+          </div>
+        </div>
+        <div class="restPill">${ex.rest}</div>
+      </div>
+      <div class="sets" id="sets-${i}"></div>
+      <div class="timerRow">
+        <button class="timerBtn" id="timerBtn-${i}">▶ Διάλειμμα ${ex.rest}</button>
+        <button class="resetBtn" id="resetBtn-${i}" title="Μηδενισμός">↺</button>
+      </div>
+    `;
+    list.appendChild(card);
+
+    const setsWrap = card.querySelector(`#sets-${i}`);
+    for(let s=0; s<rounds; s++){
+      const box = document.createElement('div');
+      box.className = 'setBox' + (arr[s] ? ' checked' : '');
+      box.textContent = s+1;
+      box.onclick = ()=>toggleSet(i, s);
+      setsWrap.appendChild(box);
+    }
+
+    const tBtn = card.querySelector(`#timerBtn-${i}`);
+    tBtn.onclick = ()=>startTimer(i, restSeconds, tBtn);
+    const rBtn = card.querySelector(`#resetBtn-${i}`);
+    rBtn.onclick = ()=>resetTimer(i, ex.rest, tBtn);
+  });
+
+  document.getElementById('progressFill').style.width = (totalSets? (doneSets/totalSets*100):0) + '%';
+  document.getElementById('progressLabel').textContent = doneSets + ' / ' + totalSets + ' σετ ολοκληρώθηκαν';
+}
+
+setRounds(3);
+selectDay('A');
+</script>
+</body>
+</html>
