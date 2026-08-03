@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Πρόγραμμα Γυμναστικής Διακοπών</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --ink:#14181A;
+    --paper:#EFEEE9;
+    --panel:#FFFFFF;
+    --accent:#FF4B26;
+    --pine:#173A30;
+    --line:#DAD8D0;
+    --mute:#6B716C;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+
+  .sheet{
+    width:210mm;
+    min-height:297mm;
+    margin:0 auto;
+    padding:16mm 16mm 12mm 16mm;
+    position:relative;
+  }
+
+  .top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:6mm;
+  }
+  .eyebrow{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .for-name{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:16px;
+    font-weight:500;
+    color:var(--mute);
+    margin-bottom:6px;
+    letter-spacing:.01em;
+  }
+  .for-name span{
+    font-size:22px;
+    font-weight:700;
+    color:var(--accent);
+    letter-spacing:-0.01em;
+    position:relative;
+    padding:0 2px;
+  }
+  .for-name span::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:-2px;
+    height:6px;
+    background:var(--accent);
+    opacity:0.18;
+    border-radius:3px;
+    z-index:-1;
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:38px;
+    margin:0;
+    line-height:0.98;
+    letter-spacing:-0.01em;
+    color:var(--ink);
+  }
+  .stat-block{
+    text-align:right;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .stat-num{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:30px;
+    font-weight:700;
+    color:var(--accent);
+    line-height:1;
+  }
+  .stat-label{
+    font-size:10.5px;
+    color:var(--mute);
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-weight:600;
+  }
+
+  .rule{height:2px;background:var(--ink);margin-bottom:6mm;}
+
+  .tags{display:flex;gap:8px;margin-bottom:7mm;flex-wrap:wrap;}
+  .tag{
+    font-size:10.5px;font-weight:600;color:var(--pine);
+    background:#fff;border:1px solid var(--line);
+    padding:5px 12px;border-radius:3px;letter-spacing:.02em;
+  }
+
+  /* day tabs */
+  .day-tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:7mm;
+  }
+  .day-tab{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px;
+    font-weight:700;
+    padding:9px 20px;
+    border-radius:8px;
+    border:1.5px solid var(--ink);
+    background:transparent;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .day-tab.active{background:var(--ink);color:#fff;}
+  .day-tab .sub{
+    display:block;
+    font-family:'Inter',sans-serif;
+    font-weight:500;
+    font-size:9.5px;
+    letter-spacing:.02em;
+    opacity:0.75;
+    margin-top:1px;
+  }
+
+  /* progress + timer */
+  .timer-bar{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:var(--ink);
+    color:#fff;
+    border-radius:10px;
+    padding:10px 16px;
+    margin-bottom:8mm;
+  }
+  .timer-label{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:12px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:#B9BEB8;
+  }
+  .timer-display{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:28px;
+    font-weight:700;
+    min-width:64px;
+    color:#fff;
+  }
+  .timer-display.done{color:var(--accent);}
+  .timer-btns{display:flex;gap:8px;margin-left:auto;}
+  .timer-btn{
+    font-family:'Inter',sans-serif;
+    font-size:12px;
+    font-weight:600;
+    border:1px solid rgba(255,255,255,0.35);
+    background:transparent;
+    color:#fff;
+    padding:7px 14px;
+    border-radius:100px;
+    cursor:pointer;
+  }
+  .timer-btn.primary{background:var(--accent);border-color:var(--accent);}
+  .timer-btn:active{opacity:0.7;}
+  .timer-presets{display:flex;gap:6px;}
+  .preset{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:11px;font-weight:600;
+    border:1px solid rgba(255,255,255,0.25);
+    background:transparent;color:#B9BEB8;
+    padding:4px 9px;border-radius:100px;cursor:pointer;
+  }
+  .preset.active{color:#fff;border-color:#fff;}
+
+  .list{display:flex;flex-direction:column;}
+  .day-list{display:none;}
+  .day-list.active{display:flex;flex-direction:column;}
+
+  .row{
+    display:grid;
+    grid-template-columns:48px 52px 1fr auto;
+    align-items:center;
+    gap:14px;
+    padding:11px 4px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+  }
+  .day-list.active .row:first-child{border-top:1px solid var(--line);}
+
+  .idx{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:30px;font-weight:700;
+    color:var(--line);line-height:1;text-align:center;
+  }
+  .row.hi .idx{color:var(--accent);}
+
+  .icon-wrap{
+    width:46px;height:46px;border-radius:50%;
+    background:var(--paper);border:1.5px solid var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .row.hi .icon-wrap{background:var(--accent);border-color:var(--accent);}
+  .icon{width:28px;height:28px;}
+  .icon svg{width:100%;height:100%;}
+
+  .info{min-width:0;}
+  .ex-name{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;font-size:15px;color:var(--ink);line-height:1.15;
+  }
+  .ex-note{font-size:11px;color:var(--mute);margin-top:2px;line-height:1.3;}
+
+  .right-col{display:flex;align-items:center;gap:10px;}
+
+  .ex-time{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:14px;font-weight:700;color:var(--ink);
+    background:#fff;border:1.5px solid var(--ink);
+    padding:5px 12px;border-radius:100px;white-space:nowrap;
+  }
+  .row.hi .ex-time{border-color:var(--accent);color:var(--accent);}
+
+  .set-dots{display:flex;gap:5px;}
+  .set-dot{
+    width:22px;height:22px;border-radius:50%;
+    border:2px solid var(--ink);
+    background:transparent;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:10px;font-weight:700;color:var(--ink);
+    padding:0;
+  }
+  .set-dot.done{background:var(--pine);border-color:var(--pine);color:#fff;}
+  .row.hi .set-dot{border-color:var(--accent);color:var(--accent);}
+  .row.hi .set-dot.done{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+  .stroke{fill:none;stroke:var(--ink);stroke-width:6;stroke-linecap:round;stroke-linejoin:round;}
+  .accent-s{fill:none;stroke:var(--ink);stroke-width:6;stroke-linecap:round;stroke-linejoin:round;opacity:0.45;}
+  .dot-svg{fill:var(--ink);}
+  .row.hi .stroke, .row.hi .accent-s, .row.hi .dot-svg{stroke:#fff;fill:#fff;}
+
+  .howto{
+    margin-top:8mm;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    padding:12px 16px 14px 16px;
+  }
+  .howto-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px;
+    font-weight:700;
+    color:var(--pine);
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    margin-bottom:8px;
+  }
+  .howto-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:12px;
+  }
+  .howto-item{
+    font-size:11px;
+    line-height:1.45;
+    color:var(--mute);
+  }
+  .howto-item b{
+    display:block;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:3px;
+  }
+
+  .footer{margin-top:8mm;display:flex;gap:0;border-top:2px solid var(--ink);}
+  .tip{flex:1;padding:10px 14px 0 0;font-size:11px;line-height:1.5;color:var(--mute);}
+  .tip:not(:last-child){border-right:1px solid var(--line);margin-right:14px;}
+  .tip b{
+    display:block;font-family:'Space Grotesk',sans-serif;
+    color:var(--ink);font-size:12px;font-weight:600;
+    margin-bottom:3px;letter-spacing:.01em;
+  }
+
+  .signature{
+    margin-top:6mm;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:10.5px;font-weight:600;color:var(--mute);
+    text-transform:uppercase;letter-spacing:.1em;
+  }
+
+  @media print{
+    .timer-bar, .set-dots, .day-tabs{display:none;}
+    .day-list{display:flex !important;flex-direction:column;}
+  }
+
+  @media (max-width: 640px){
+    .sheet{
+      width:100%;
+      min-height:auto;
+      padding:6mm 4mm 8mm 4mm;
+    }
+    .top{
+      flex-direction:column;
+      align-items:flex-start;
+      gap:10px;
+    }
+    .stat-block{
+      text-align:left;
+      flex-direction:row;
+      gap:10px;
+      align-items:baseline;
+      flex-wrap:wrap;
+    }
+    h1{font-size:28px;}
+    .tags{gap:6px;}
+    .tag{font-size:9.5px;padding:4px 9px;}
+
+    .day-tabs{flex-wrap:wrap;}
+    .day-tab{flex:1;min-width:130px;padding:10px 8px;font-size:12px;text-align:center;}
+
+    .timer-bar{
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .timer-btns{margin-left:0;width:100%;justify-content:flex-end;}
+    .timer-presets{order:1;}
+    .timer-display{font-size:22px;min-width:52px;}
+
+    .row{
+      grid-template-columns:36px 40px 1fr;
+      grid-template-areas:
+        "idx icon info"
+        "idx icon right";
+      row-gap:6px;
+      padding:12px 2px;
+    }
+    .idx{grid-area:idx;font-size:22px;}
+    .icon-wrap{grid-area:icon;width:38px;height:38px;}
+    .icon{width:22px;height:22px;}
+    .info{grid-area:info;}
+    .right-col{grid-area:right;justify-self:start;}
+    .ex-name{font-size:14px;}
+    .ex-note{font-size:10.5px;}
+    .set-dot{width:24px;height:24px;font-size:11px;}
+
+    .footer{flex-direction:column;gap:10px;}
+    .howto-grid{grid-template-columns:1fr;gap:10px;}
+    .tip{padding:8px 0 0 0;}
+    .tip:not(:last-child){border-right:none;margin-right:0;border-bottom:1px solid var(--line);padding-bottom:10px;}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="top">
+    <div>
+      <div class="eyebrow">Καλοκαιρινές διακοπές</div>
+      <div class="for-name">Για τη <span>Μάρα</span></div>
+      <h1>Πρόγραμμα<br>Γυμναστικής</h1>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num">~10΄</div>
+      <div class="stat-label">Χωρίς εξοπλισμό</div>
+      <div class="stat-label">Όλο το σώμα</div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="tags">
+    <div class="tag">2 εναλλασσόμενες ημέρες</div>
+  </div>
+
+  <div class="day-tabs">
+    <button class="day-tab active" data-day="A">Ημέρα Α<span class="sub">Squat · Push-ups · Cardio</span></button>
+    <button class="day-tab" data-day="B">Ημέρα Β<span class="sub">Squat · Γλουτοί · Κοιλιακοί</span></button>
+  </div>
+
+  <div class="timer-bar">
+    <div class="timer-label">Διάλειμμα</div>
+    <div class="timer-display" id="timerDisplay">0:30</div>
+    <div class="timer-presets">
+      <button class="preset active" data-secs="30">30΄΄</button>
+      <button class="preset" data-secs="45">45΄΄</button>
+    </div>
+    <div class="timer-btns">
+      <button class="timer-btn primary" id="startBtn">Έναρξη</button>
+      <button class="timer-btn" id="resetBtn">Μηδενισμός</button>
+    </div>
+  </div>
+
+  <div class="list">
+
+    <!-- DAY A -->
+    <div class="day-list active" data-day="A">
+
+      <div class="row">
+        <div class="idx">01</div>
+        <div class="icon-wrap"><div class="icon"><svg viewBox="0 0 100 100">
+          <circle class="dot-svg" cx="50" cy="16" r="8"/>
+          <path class="stroke" d="M50 24 L50 48"/>
+          <path class="accent-s" d="M50 30 L30 42 M50 30 L70 42"/>
+          <path class="stroke" d="M50 48 L26 88 M50 48 L74 88"/>
+          <path class="stroke" d="M26 88 L34 88 M74 88 L66 88"/>
+        </svg></div></div>
+        <div class="info">
+          <div class="ex-name">Sumo Squat</div>
+          <div class="ex-note">10 επαναλήψεις ανά σετ — πόδια ανοιχτά, δάχτυλα έξω</div>
+        </div>
+        <div class="right-col"><div class="set-dots" data-sets="2"></div></div>
+      </div>
+
+      <div class="row">
+        <div class="idx">02</div>
+        <div class="icon-wrap"><div class="icon"><svg viewBox="0 0 100 100">
+          <path class="stroke" d="M78 12 L78 92"/>
+          <circle class="dot-svg" cx="60" cy="34" r="7"/>
+          <path class="stroke" d="M64 39 L78 46"/>
+          <path class="accent-s" d="M64 39 L48 30 M64 39 L52 52"/>
+          <path class="stroke" d="M52 52 L34 70 L30 90"/>
+          <path class="stroke" d="M52 52 L60 74 L62 90"/>
+        </svg></div></div>
+        <div class="info">
+          <div class="ex-name">Push-ups σε τοίχο</div>
+          <div class="ex-note">8 επαναλήψεις ανά σετ — κεκλιμένα, χέρια στο ύψος ώμων</div>
+        </div>
+        <div class="right-col"><div class="set-dots" data-sets="3"></div></div>
+      </div>
+
+      <div class="row">
+        <div class="idx">03</div>
+        <div class="icon-wrap"><div class="icon"><svg viewBox="0 0 100 100">
+          <path class="stroke" d="M78 10 L78 92"/>
+          <circle class="dot-svg" cx="62" cy="30" r="7"/>
+          <path class="stroke" d="M66 35 L78 44"/>
+          <path class="accent-s" d="M66 35 L50 24 M66 35 L58 52"/>
+          <path class="stroke" d="M78 44 L58 52 L52 68"/>
+        </svg></div></div>
+        <div class="info">
+          <div class="ex-name">Wall Angels</div>
+          <div class="ex-note">10 επαναλήψεις ανά σετ — πλάτη στον τοίχο, χέρια από "W" σε "Y"</div>
+        </div>
+        <div class="right-col"><div class="set-dots" data-sets="2"></div></div>
+      </div>
+
+      <div class="row">
+        <div class="idx">04</div>
+        <div class="icon-wrap"><div class="icon"><svg viewBox="0 0 100 100">
+          <path class="stroke" d="M10 82 L90 60"/>
+          <circle class="dot-svg" cx="18" cy="78" r="7"/>
+          <path class="accent-s" d="M25 80 L55 68 L58 50"/>
+          <path class="stroke" d="M55 68 L72 76 L84 62"/>
+        </svg></div></div>
+        <div class="info">
+          <div class="ex-name">Mountain Climbers</div>
+          <div class="ex-note">20 επαναλήψεις ανά σετ (10 ανά πλευρά) — θέση plank, γρήγορη εναλλαγή γονάτων</div>
+        </div>
+        <div class="right-col"><div class="set-dots" data-sets="3"></div></div>
+      </div>
+
+      <div class="row">
+        <div class="idx">05</div>
+        <div class="icon-wrap"><div class="icon"><svg viewBox="0 0 100 100">
+          <circle class="dot-svg" cx="50" cy="18" r="8"/>
+          <path class="stroke" d="M50 26 L50 56"/>
+          <path class="accent-s" d="M50 32 L34 24 M50 32 L66 24"/>
+          <path class="stroke" d="M50 56 L42 82 L42 88"/>
+          <path class="stroke" d="M50 56 L58 82 L58 88"/>
+          <path class="stroke" d="M40 90 L46 88 M56 88 L62 90"/>
+        </svg></div></div>
+        <div class="info">
+          <div class="ex-name">Calf Raises</div>
+          <div class="ex-note">12 επαναλήψεις ανά σετ — άρσεις στις μύτες των ποδιών</div>
+        </div>
+        <div class="right-col"><div class="set-dots" data-sets="2"></div></div>
+      </div>
+
+      <div class="row">
+        <div class="idx">06</div>
+        <div class="icon-wrap"><div class="icon"><svg viewBox="0 0 100 100">
+          <circle class="dot-svg" cx="50" cy="16" r="8"/>
+          <path class="stroke" d="M50 24 L50 60"/>
+          <path class="accent-s" d="M50 30 Q70 34 66 16"/>
+          <path class="stroke" d="M50 30 L34 40"/>
+          <path class="stroke" d="M50 60 L36 90 M50 60 L64 90"/>
+        </svg></div></div>
+        <div class="info">
+          <div class="ex-name">Διατάσεις με Πετσέτα</div>
+          <div class="ex-note">Διατάσεις με βοήθεια πετσέτας (π.χ. οπίσθιοι μηριαίοι, ώμοι, πλάτη)</div>
+        </div>
+        <div class="right-col"><div class="ex-time">1:15</div></div>
+      </div>
+
+    </div>
+
+    <!-- DAY B -->
+    <div class="day-list" data-day="B">
+
+      <div class="row">
+        <div class="idx">01</div>
+        <div class="icon-wrap"><div class="icon"><svg viewBox="0 0 100 100">
+          <circle class="dot-svg" cx="50" cy="16" r="8"/>
+          <path class="stroke" d="M50 24 L50 46"/>
+          <path class="accent-s" d="M50 30 L34 40 M50 30 L66 40"/>
+          <path class="stroke" d="M50 46 L38 68 L38 90"/>
+          <path class="stroke" d="M50 46 L62 68 L62 90"/>
+        </svg></div></div>
+        <div class="info">
+          <div class="ex-name">Κανονικό Squat</div>
+          <div class="ex-note">8 επαναλήψεις ανά σετ — πόδια στο πλάτος ώμων</div>
+        </div>
+        <div class="right-col"><div class="set-dots" data-sets="2"></div></div>
+      </div>
+
+      <div class="row">
+        <div class="idx">02</div>
+        <div class="icon-wrap"><div class="icon"><svg viewBox="0 0 100 100">
+          <path class="stroke" d="M14 78 L86 78"/>
+          <circle class="dot-svg" cx="24" cy="66" r="7"/>
+          <path class="stroke" d="M30 70 L50 55 L72 62"/>
+          <path class="accent-s" d="M50 55 L48 78"/>
+          <path class="stroke" d="M72 62 L82 78"/>
+        </svg></div></div>
+        <div class="info">
+          <div class="ex-name">Άρσεις Λεκάνης</div>
+          <div class="ex-note">12 επαναλήψεις ανά σετ — ύπτια, γόνατα λυγισμένα, σφίξιμο γλουτών στην κορυφή</div>
+        </div>
+        <div class="right-col"><div class="set-dots" data-sets="2"></div></div>
+      </div>
+
+      <div class="row">
+        <div class="idx">03</div>
+        <div class="icon-wrap"><div class="icon"><svg viewBox="0 0 100 100">
+          <path class="stroke" d="M20 60 L80 60"/>
+          <circle class="dot-svg" cx="24" cy="46" r="7"/>
+          <path class="accent-s" d="M30 50 L30 62 M50 62 L50 74"/>
+          <path class="stroke" d="M55 60 Q55 40 40 32"/>
+          <path class="stroke" d="M65 60 Q78 68 84 84"/>
+        </svg></div></div>
+        <div class="info">
+          <div class="ex-name">Dead Bug</div>
+          <div class="ex-note">10 επαναλήψεις ανά πλευρά, ανά σετ — ύπτια, εναλλάξ αντίθετο χέρι-πόδι, μέση σταθερή</div>
+        </div>
+        <div class="right-col"><div class="set-dots" data-sets="2"></div></div>
+      </div>
+
+      <div class="row">
+        <div class="idx">04</div>
+        <div class="icon-wrap"><div class="icon"><svg viewBox="0 0 100 100">
+          <circle class="dot-svg" cx="50" cy="16" r="8"/>
+          <path class="stroke" d="M50 24 L50 60"/>
+          <path class="accent-s" d="M50 30 Q70 34 66 16"/>
+          <path class="stroke" d="M50 30 L34 40"/>
+          <path class="stroke" d="M50 60 L36 90 M50 60 L64 90"/>
+        </svg></div></div>
+        <div class="info">
+          <div class="ex-name">Διατάσεις με Πετσέτα</div>
+          <div class="ex-note">Διατάσεις με βοήθεια πετσέτας (π.χ. οπίσθιοι μηριαίοι, ώμοι, πλάτη)</div>
+        </div>
+        <div class="right-col"><div class="ex-time">1:15</div></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="howto">
+    <div class="howto-title">Πώς γίνονται οι Διατάσεις με Πετσέτα</div>
+    <div class="howto-grid">
+      <div class="howto-item">
+        <b>Οπίσθιοι μηριαίοι</b>
+        Ανάσκελα, πετσέτα γύρω από το πέλμα, πόδι τεντωμένο ψηλά. Τραβάς απαλά προς εσένα κρατώντας το γόνατο ίσιο. Κράτημα ~20".
+      </div>
+      <div class="howto-item">
+        <b>Ώμοι</b>
+        Όρθια, κρατάς την πετσέτα οριζόντια με τα δύο χέρια τεντωμένα μπροστά. Ανεβάζεις αργά πάνω από το κεφάλι και προς τα πίσω. Κράτημα ~15-20".
+      </div>
+      <div class="howto-item">
+        <b>Πλάτη</b>
+        Πετσέτα τεντωμένη μπροστά σου με τα δύο χέρια. Σπρώχνεις μπροστά-κάτω στρογγυλεύοντας ελαφρά την πλάτη, σαν να αγκαλιάζεις μπαλόνι.
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="tip"><b>Πριν ξεκινήσεις</b>Άνετα ρούχα, παπούτσια με καλή στήριξη, νερό κοντά.</div>
+    <div class="tip"><b>Ένταση</b>Αν κάτι πονάει (όχι απλή κούραση), σταμάτα ή μείωσε ρυθμό.</div>
+    <div class="tip"><b>Συχνότητα</b>Εναλλαγή Α/Β σε καθημερινή βάση στις διακοπές.</div>
+  </div>
+
+  <div class="signature">10 λεπτά — κάθε μέρα διακοπών</div>
+
+</div>
+
+<script>
+  function recomputeForActiveDay(){
+    // kept as a no-op hook point (progress counter removed)
+  }
+
+  // build set-dot buttons for every day (both hidden and visible)
+  document.querySelectorAll('.set-dots').forEach(function(container){
+    var n = parseInt(container.dataset.sets, 10);
+    for (var i = 1; i <= n; i++){
+      var btn = document.createElement('button');
+      btn.className = 'set-dot';
+      btn.textContent = i;
+      btn.type = 'button';
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        this.classList.toggle('done');
+      });
+      container.appendChild(btn);
+    }
+  });
+
+  // click a row to toggle its highlight color
+  document.querySelectorAll('.row').forEach(function(row){
+    row.addEventListener('click', function(){
+      this.classList.toggle('hi');
+    });
+  });
+
+  // day tab switching
+  document.querySelectorAll('.day-tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var day = this.dataset.day;
+      document.querySelectorAll('.day-tab').forEach(function(t){ t.classList.remove('active'); });
+      this.classList.add('active');
+      document.querySelectorAll('.day-list').forEach(function(l){
+        l.classList.toggle('active', l.dataset.day === day);
+      });
+      recomputeForActiveDay();
+    });
+  });
+
+  recomputeForActiveDay();
+
+  // rest timer
+  var remaining = 30;
+  var duration = 30;
+  var intervalId = null;
+  var display = document.getElementById('timerDisplay');
+  var startBtn = document.getElementById('startBtn');
+  var resetBtn = document.getElementById('resetBtn');
+  var presets = document.querySelectorAll('.preset');
+
+  function formatTime(s){
+    var m = Math.floor(s / 60);
+    var sec = s % 60;
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+
+  function renderTimer(){
+    display.textContent = formatTime(remaining);
+    display.classList.toggle('done', remaining === 0);
+  }
+
+  function tick(){
+    remaining -= 1;
+    if (remaining <= 0){
+      remaining = 0;
+      renderTimer();
+      clearInterval(intervalId);
+      intervalId = null;
+      startBtn.textContent = 'Έναρξη';
+      return;
+    }
+    renderTimer();
+  }
+
+  startBtn.addEventListener('click', function(){
+    if (intervalId){
+      clearInterval(intervalId);
+      intervalId = null;
+      startBtn.textContent = 'Έναρξη';
+      return;
+    }
+    if (remaining === 0){ remaining = duration; }
+    startBtn.textContent = 'Παύση';
+    intervalId = setInterval(tick, 1000);
+  });
+
+  resetBtn.addEventListener('click', function(){
+    clearInterval(intervalId);
+    intervalId = null;
+    remaining = duration;
+    startBtn.textContent = 'Έναρξη';
+    renderTimer();
+  });
+
+  presets.forEach(function(p){
+    p.addEventListener('click', function(){
+      presets.forEach(function(x){ x.classList.remove('active'); });
+      this.classList.add('active');
+      duration = parseInt(this.dataset.secs, 10);
+      clearInterval(intervalId);
+      intervalId = null;
+      remaining = duration;
+      startBtn.textContent = 'Έναρξη';
+      renderTimer();
+    });
+  });
+
+  renderTimer();
+</script>
+
+</body>
+</html>
