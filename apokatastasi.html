@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Πρόγραμμα Αποκατάστασης &amp; Προπόνησης</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #15171a;
+    --panel: #1e2124;
+    --panel-2: #24272b;
+    --line: #34383d;
+    --text: #ece9e1;
+    --muted: #8a8f8c;
+    --rust: #c1652f;
+    --rust-dim: #7a4423;
+    --safe: #6fa287;
+    --safe-dim: #3c5347;
+    --warn: #c99a3c;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    padding:0 0 60px;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--rust);color:#fff;}
+
+  header{
+    padding:36px 20px 22px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  header::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      repeating-linear-gradient(115deg, transparent 0 38px, rgba(193,101,47,0.05) 38px 39px);
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:.14em;
+    color:var(--rust);
+    text-transform:uppercase;
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:700;
+    font-size:clamp(30px,8vw,42px);
+    line-height:1.02;
+    margin:0 0 10px;
+    letter-spacing:.01em;
+  }
+  .sub{
+    color:var(--muted);
+    font-size:14.5px;
+    line-height:1.5;
+    max-width:52ch;
+  }
+  .sub b{color:var(--text);font-weight:600;}
+
+  .rule-strip{
+    display:flex; gap:0; margin-top:20px;
+    border:1px solid var(--line); border-radius:8px; overflow:hidden;
+  }
+  .rule-strip div{
+    flex:1; padding:10px 12px; text-align:center;
+    font-family:'JetBrains Mono',monospace; font-size:11.5px;
+    color:var(--muted); border-right:1px solid var(--line);
+  }
+  .rule-strip div:last-child{border-right:none;}
+  .rule-strip b{display:block;color:var(--text);font-size:15px;font-family:'Barlow Condensed',sans-serif;font-weight:600;margin-top:2px;}
+
+  main{max-width:640px;margin:0 auto;padding:0 20px;}
+
+  .section{margin-top:34px;}
+  .section-head{
+    display:flex; align-items:baseline; gap:10px;
+    margin-bottom:14px;
+  }
+  .section-tag{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px; color:var(--bg);
+    background:var(--rust);
+    padding:3px 8px; border-radius:4px;
+    font-weight:600; letter-spacing:.03em;
+  }
+  .section-title{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:600; font-size:22px;
+  }
+  .section-note{
+    font-size:13px; color:var(--muted); margin:-6px 0 16px;
+  }
+
+  /* Rehab exercise cards (expandable) */
+  .rehab-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    margin-bottom:10px;
+    overflow:hidden;
+  }
+  .rehab-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px; cursor:pointer; user-select:none;
+    gap:12px;
+  }
+  .rehab-head-left{display:flex; align-items:center; gap:12px; min-width:0;}
+  .rehab-num{
+    font-family:'JetBrains Mono',monospace; color:var(--safe);
+    font-size:13px; flex-shrink:0; width:18px;
+  }
+  .rehab-name{font-weight:600; font-size:15px;}
+  .rehab-dose{
+    font-family:'JetBrains Mono',monospace; font-size:12.5px;
+    color:var(--muted); flex-shrink:0;
+  }
+  .chev{
+    color:var(--muted); font-size:13px; transition:transform .2s ease; flex-shrink:0;
+  }
+  .rehab-card.open .chev{transform:rotate(180deg);}
+  .rehab-body{
+    max-height:0; overflow:hidden; transition:max-height .25s ease;
+    border-top:1px solid transparent;
+  }
+  .rehab-card.open .rehab-body{border-top:1px solid var(--line);}
+  .rehab-body-inner{padding:14px 16px 16px; font-size:13.8px; line-height:1.65; color:#cfccc4;}
+  .rehab-body-inner ul{margin:0; padding-left:18px;}
+  .rehab-body-inner li{margin-bottom:6px;}
+  .rehab-body-inner li:last-child{margin-bottom:0;}
+  .flag{
+    margin-top:10px; padding:8px 10px; border-radius:6px;
+    background:rgba(201,154,60,0.12); border:1px solid rgba(201,154,60,0.3);
+    color:var(--warn); font-size:12.5px; line-height:1.5;
+  }
+
+  /* Workout table-cards with checkboxes */
+  .ex-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 16px;
+    margin-bottom:10px;
+    display:flex; align-items:center; gap:14px;
+  }
+  .ex-num{
+    font-family:'JetBrains Mono',monospace; color:var(--rust);
+    font-size:13px; width:16px; flex-shrink:0;
+  }
+  .ex-info{flex:1; min-width:0;}
+  .ex-name{font-weight:600; font-size:15px; margin-bottom:2px;}
+  .ex-meta{
+    font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--muted);
+  }
+  .set-boxes{display:flex; gap:6px; flex-shrink:0;}
+  .set-box{
+    width:22px; height:22px; border-radius:5px;
+    border:1.5px solid var(--line);
+    cursor:pointer;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .set-box.done{background:var(--safe); border-color:var(--safe);}
+
+  .group-label{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px;
+    color:var(--muted); text-transform:uppercase; letter-spacing:.08em;
+    margin:18px 0 8px;
+  }
+  .group-label:first-child{margin-top:0;}
+
+  footer{
+    max-width:640px; margin:40px auto 0; padding:16px 20px 0;
+    border-top:1px solid var(--line);
+    font-size:12.5px; color:var(--muted); line-height:1.7;
+  }
+  footer b{color:var(--text);}
+
+  @media (max-width:380px){
+    .set-box{width:19px;height:19px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Φάση αποκατάστασης &middot; μέχρι τη μαγνητική</p>
+  <h1>Πρόγραμμα<br>3 προπονήσεων</h1>
+  <p class="sub">Ίδια δομή κάθε φορά, <b>μια μέρα κενό ανάμεσα</b> — π.χ. Δευ / Τετ / Παρ. Δικέφαλος εκτός φορτίου· γόνατο και ώμος μέσα σε ανώδυνο εύρος.</p>
+  <div class="rule-strip">
+    <div>Διάρκεια<b>~65'</b></div>
+    <div>Ασκήσεις<b>4 + 3</b></div>
+    <div>Πόνος όριο<b>3/10</b></div>
+  </div>
+</header>
+
+<main>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-tag">Α</span>
+      <span class="section-title">Αποκατάσταση</span>
+    </div>
+    <p class="section-note">Πρώτα, φρέσκος. 10-12 λεπτά. Πάτα σε κάθε άσκηση για την τεχνική.</p>
+
+    <div class="rehab-card" data-open="false">
+      <div class="rehab-head">
+        <div class="rehab-head-left">
+          <span class="rehab-num">01</span>
+          <span class="rehab-name">Ισομετρικά δικεφάλου</span>
+        </div>
+        <span class="rehab-dose">4×30″</span>
+        <span class="chev">▾</span>
+      </div>
+      <div class="rehab-body"><div class="rehab-body-inner">
+        <ul>
+          <li>Όρθιος, πάσχων αγκώνας κολλητά στο πλευρό, λυγισμένος στις <b>90°</b>, παλάμη προς τα πάνω.</li>
+          <li>Η υγιής παλάμη πιέζει πάνω από το πάσχον αντιβράχιο.</li>
+          <li>Το πάσχον χέρι <b>προσπαθεί</b> να λυγίσει, το υγιές το εμποδίζει — τίποτα δεν κινείται.</li>
+          <li>Ένταση 30-40% της δύναμής σου, όχι μέγιστη.</li>
+          <li>30″ κράτημα, 30″ παύση, ×4.</li>
+        </ul>
+        <div class="flag">Αν πονάει λίγο, μείωσε την ένταση — μη σταματήσεις. Τα ισομετρικά συνήθως μειώνουν τον πόνο.</div>
+      </div></div>
+    </div>
+
+    <div class="rehab-card" data-open="false">
+      <div class="rehab-head">
+        <div class="rehab-head-left">
+          <span class="rehab-num">02</span>
+          <span class="rehab-name">External rotations (λάστιχο)</span>
+        </div>
+        <span class="rehab-dose">2×15</span>
+        <span class="chev">▾</span>
+      </div>
+      <div class="rehab-body"><div class="rehab-body-inner">
+        <ul>
+          <li>Λάστιχο δεμένο στο ύψος του αγκώνα. Στέκεσαι πλάγια.</li>
+          <li>Αγκώνας κολλητά στο πλευρό, 90° λύγισμα. Πετσέτα ρολό ανάμεσα σε αγκώνα-κορμό.</li>
+          <li>Στρίβεις το αντιβράχιο <b>προς τα έξω</b>, 45-60°. Επιστροφή αργή.</li>
+          <li>Ο κορμός μένει ακίνητος — μη στρίβεις όλο το σώμα.</li>
+        </ul>
+      </div></div>
+    </div>
+
+    <div class="rehab-card" data-open="false">
+      <div class="rehab-head">
+        <div class="rehab-head-left">
+          <span class="rehab-num">03</span>
+          <span class="rehab-name">Scapular retractions</span>
+        </div>
+        <span class="rehab-dose">2×12</span>
+        <span class="chev">▾</span>
+      </div>
+      <div class="rehab-body"><div class="rehab-body-inner">
+        <ul>
+          <li>Καθιστός/όρθιος, χέρια χαλαρά.</li>
+          <li>Σφίγγεις τις ωμοπλάτες μεταξύ τους <b>και προς τα κάτω</b> — σαν να τις βάζεις στις πίσω τσέπες.</li>
+          <li>Κράτημα 5″, χαλάρωση.</li>
+          <li>Οι ώμοι δεν ανεβαίνουν προς τα αυτιά.</li>
+        </ul>
+      </div></div>
+    </div>
+
+    <div class="rehab-card" data-open="false">
+      <div class="rehab-head">
+        <div class="rehab-head-left">
+          <span class="rehab-num">04</span>
+          <span class="rehab-name">Wall slides</span>
+        </div>
+        <span class="rehab-dose">×10</span>
+        <span class="chev">▾</span>
+      </div>
+      <div class="rehab-body"><div class="rehab-body-inner">
+        <ul>
+          <li>Αντιβράχια στον τοίχο, αγκώνες στο ύψος του στήθους.</li>
+          <li>Σέρνεις αργά προς τα πάνω, μόνο μέχρι εκεί που δεν πονάει.</li>
+          <li>Αργή επιστροφή στην αρχική θέση.</li>
+        </ul>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-tag">Β</span>
+      <span class="section-title">Προπόνηση</span>
+    </div>
+    <p class="section-note">Πάτα τα τετράγωνα όσο ολοκληρώνεις σετ.</p>
+
+    <div class="ex-card">
+      <span class="ex-num">1</span>
+      <div class="ex-info">
+        <div class="ex-name">Sumo squat</div>
+        <div class="ex-meta">3×12 · ξεκ. 90″</div>
+      </div>
+      <div class="set-boxes" data-sets="3"></div>
+    </div>
+    <div class="ex-card">
+      <span class="ex-num">2</span>
+      <div class="ex-info">
+        <div class="ex-name">Hip thrusts</div>
+        <div class="ex-meta">4×12 · ξεκ. 90″</div>
+      </div>
+      <div class="set-boxes" data-sets="4"></div>
+    </div>
+    <div class="ex-card">
+      <span class="ex-num">3</span>
+      <div class="ex-info">
+        <div class="ex-name">Crunches</div>
+        <div class="ex-meta">3×15 · ξεκ. 45″</div>
+      </div>
+      <div class="set-boxes" data-sets="3"></div>
+    </div>
+    <div class="ex-card">
+      <span class="ex-num">4</span>
+      <div class="ex-info">
+        <div class="ex-name">Plank με πήχεις</div>
+        <div class="ex-meta">3×30-40″ · ξεκ. 45″</div>
+      </div>
+      <div class="set-boxes" data-sets="3"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-tag">Γ</span>
+      <span class="section-title">Υγιές χέρι</span>
+    </div>
+    <p class="section-note">Μέτριο προς βαρύ φορτίο — εδώ πιέζεις κανονικά.</p>
+
+    <div class="ex-card">
+      <span class="ex-num">1</span>
+      <div class="ex-info">
+        <div class="ex-name">Μονόπλευρη κωπηλατική</div>
+        <div class="ex-meta">3×12</div>
+      </div>
+      <div class="set-boxes" data-sets="3"></div>
+    </div>
+    <div class="ex-card">
+      <span class="ex-num">2</span>
+      <div class="ex-info">
+        <div class="ex-name">Πιέση ώμων (καθιστός)</div>
+        <div class="ex-meta">3×12</div>
+      </div>
+      <div class="set-boxes" data-sets="3"></div>
+    </div>
+    <div class="ex-card">
+      <span class="ex-num">3</span>
+      <div class="ex-info">
+        <div class="ex-name">Lateral raise</div>
+        <div class="ex-meta">3×12</div>
+      </div>
+      <div class="set-boxes" data-sets="3"></div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p><b>Πρόοδος:</b> όλα τα σετ καθαρά σε 2 συνεχόμενες προπονήσεις → +5% βάρος. Στη σανίδα, +10″.</p>
+  <p><b>Μέρες ρεπό:</b> μόνο το Μέρος Α, 10 λεπτά.</p>
+  <p><b>Γόνατο:</b> στα sumo, βάθος μέχρι εκεί που δεν ενοχλεί.</p>
+</footer>
+
+<script>
+  // Expand/collapse rehab cards
+  document.querySelectorAll('.rehab-card').forEach(card => {
+    const head = card.querySelector('.rehab-head');
+    const body = card.querySelector('.rehab-body');
+    head.addEventListener('click', () => {
+      const isOpen = card.classList.toggle('open');
+      body.style.maxHeight = isOpen ? body.scrollHeight + 'px' : '0px';
+    });
+  });
+
+  // Set tracker checkboxes (in-memory only)
+  document.querySelectorAll('.set-boxes').forEach(container => {
+    const n = parseInt(container.dataset.sets, 10);
+    for (let i = 0; i < n; i++) {
+      const box = document.createElement('div');
+      box.className = 'set-box';
+      box.addEventListener('click', () => box.classList.toggle('done'));
+      container.appendChild(box);
+    }
+  });
+</script>
+
+</body>
+</html>
